@@ -1,71 +1,67 @@
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js';
+function generateContent() {
+  const titleInput = document.getElementById("title").value.trim();
+  const userPrompt = document.getElementById("prompt").value.trim();
 
-// Singleton pattern to ensure the model is loaded only once.
-class TextGenerationPipeline {
-    static task = 'text-generation';
-    static model = 'Xenova/distilgpt2';
-    static instance = null;
+  if (!userPrompt) {
+    alert("Please describe what your song is about.");
+    return;
+  }
 
-    static async getInstance(progress_callback = null) {
-        if (this.instance === null) {
-            this.instance = pipeline(this.task, this.model, { progress_callback });
-        }
-        return this.instance;
-    }
-}
+  const genres = ['EDM', 'house', 'techno', 'hyperpop', 'slutpop'].join(', ');
 
-async function generateContent() {
-    const titleInput = document.getElementById('title').value.trim();
-    const promptText = document.getElementById('prompt').value.trim();
+  const fullPrompt = `
+You are an expert songwriter and prompt engineer specializing in generating lyrics for AI music platforms like Suno.
 
-    if (!promptText) {
-        alert('Please enter a prompt for the song.');
-        return;
-    }
+Your task is to create a detailed, high-quality prompt that will be used by another AI (like ChatGPT, Gemini, or Claude) to generate song lyrics.
 
-    const fullPrompt = `Write raw, emotional song lyrics in the style of edm, house, or hyperpop about ${promptText}. Do not use clichés or common AI words like 'echo', 'shadow', or 'whisper'.`;
+**Instructions for the final AI:**
 
-    // Show a loading indicator
-    const lyricsOutput = document.getElementById('lyricsOutput');
-    lyricsOutput.innerText = 'Generating... (Model is loading for the first time, this may take a moment)';
+1.  **Title:** ${titleInput ? `The song must be titled "${titleInput}".` : "Generate a unique and bold AI-style song title (maximum 5 words)."}
 
-    try {
-        // Get the pipeline instance
-        const generator = await TextGenerationPipeline.getInstance((data) => {
-            console.log('Loading progress:', data);
-            if (data.status === 'progress') {
-                 lyricsOutput.innerText = `Loading model... ${Math.round(data.progress)}%`;
-            }
-        });
+2.  **Lyrics Structure:**
+    *   Generate full lyrics for a song based on the topic: "${userPrompt}".
+    *   The lyrics must be in English.
+    *   The structure should be conventional (e.g., Verse 1, Chorus, Verse 2, Chorus, Bridge, Chorus).
+    *   Each line of the lyrics must be enclosed in (parentheses).
+    *   Include bracketed tags for musical cues, like [Intro], [Verse], [Chorus], [Bridge], [Outro].
+    *   Include bracketed tags for musical style and production, like [kick deepens, pads shimmer] or [vocal synth arpeggiates].
 
-        // Generate text
-        const output = await generator(fullPrompt, {
-            max_new_tokens: 250,
-            num_return_sequences: 1,
-            do_sample: true,
-            top_k: 50,
-            temperature: 0.9,
-        });
+3.  **Style and Tone:**
+    *   The overall genre is: **${genres}**.
+    *   The tone should be raw, emotional, and avoid clichés.
+    *   **Banned Words:** Do not use the words "rhythm", "beat", "echo", "shadow", or "whisper" in the lyrics.
 
-        const generatedText = output[0].generated_text;
+4.  **Final Output Format:**
+    The final output must be a single block of text containing only the title and the complete, formatted lyrics.
 
-        // Display the output
-        document.getElementById('generatedTitle').innerText = titleInput ? `Title: ${titleInput}` : `Generated Title: My AI Song`;
-        lyricsOutput.innerText = generatedText;
+**Example of desired output format:**
 
-    } catch (error) {
-        console.error('Error generating content:', error);
-        lyricsOutput.innerText = 'Failed to generate lyrics. See console for details.';
-    }
+(A song about a lonely star)
+TITLE: Celestial Static
+LYRICS:
+[Intro: Ethereal pads and a slow, pulsing synth]
+(Verse 1)
+(In the velvet black, a single tear)
+(A diamond lost, year after year)
+(I trace the orbits, cold and vast)
+(A future fading, a forgotten past)
+(Chorus)
+(I'm just celestial static, a silent scream)
+(Lost in the fabric of a cosmic dream)
+(A billion voices, I can't break through)
+(Just a lonely flicker, in a sea of blue)
+`;
+
+  document.getElementById("promptOutput").innerText = fullPrompt;
 }
 
 function copyToClipboard(id) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
-    });
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Copied to clipboard!");
+  });
 }
 
-// Make functions available in the global scope
+// Make functions available in the global scope since we are not using a module loader
 window.generateContent = generateContent;
 window.copyToClipboard = copyToClipboard;
