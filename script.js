@@ -1,37 +1,68 @@
-function generateContent() {
-  const titleInput = document.getElementById("title").value.trim();
-  const promptText = document.getElementById("prompt").value.trim();
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0/dist/transformers.min.js';
 
-  if (!promptText) {
-    alert("Please enter a prompt for the song.");
-    return;
-  }
+// Singleton pattern to ensure the model is loaded only once.
+class TextGenerationPipeline {
+    static task = 'text-generation';
+    static model = 'Xenova/distilgpt2';
+    static instance = null;
 
-  // Simulated generation (replace later with AI logic)
-  const generatedTitle = titleInput || generateFakeTitle(promptText);
-  const lyrics = generateFakeLyrics(promptText, generatedTitle);
-  const style = generateFakeStyle(promptText, generatedTitle);
-
-  document.getElementById("generatedTitle").innerText = titleInput ? `Title: ${titleInput}` : `Generated Title: ${generatedTitle}`;
-  document.getElementById("lyricsOutput").innerText = lyrics;
-  document.getElementById("styleOutput").innerText = style;
+    static async getInstance(progress_callback = null) {
+        if (this.instance === null) {
+            this.instance = pipeline(this.task, this.model, { progress_callback });
+        }
+        return this.instance;
+    }
 }
 
-function generateFakeTitle(prompt) {
-  return "Midnight Spell"; // later: actual AI logic
-}
+async function generateContent() {
+    const titleInput = document.getElementById('title').value.trim();
+    const promptText = document.getElementById('prompt').value.trim();
 
-function generateFakeLyrics(prompt, title) {
-  return `[Tag: Genre; Slutpop Hyperhouse]\n[Intro: Pads shimmer, kick fades in]\n(${title}… I whisper it like a curse)\n[Verse 1: Bass glides in, whisper vocals begin]\n(You said you'd love me forever...)`;
-}
+    if (!promptText) {
+        alert('Please enter a prompt for the song.');
+        return;
+    }
 
-function generateFakeStyle(prompt, title) {
-  return `A gritty and empowering slutpop track with hyperpop and house influences. It blends whispered vocals, bouncing club-ready production, and a raw sensual tone. Generated from prompt: "${prompt}".`;
+    // Show a loading indicator (optional, but good for UX)
+    const lyricsOutput = document.getElementById('lyricsOutput');
+    lyricsOutput.innerText = 'Generating... (Model is loading for the first time, this may take a moment)';
+
+    try {
+        // Get the pipeline instance
+        const generator = await TextGenerationPipeline.getInstance((data) => {
+            // You can track loading progress here if you want.
+            console.log('Loading progress:', data);
+            if (data.status === 'progress') {
+                 lyricsOutput.innerText = `Loading model... ${Math.round(data.progress)}%`;
+            }
+        });
+
+        // Generate text
+        const output = await generator(promptText, {
+            max_new_tokens: 200,
+            num_return_sequences: 1,
+            eos_token_id: 50256, // End-of-sequence token for GPT-2
+        });
+
+        const generatedText = output[0].generated_text;
+
+        // Display the output
+        document.getElementById('generatedTitle').innerText = titleInput ? `Title: ${titleInput}` : `Generated Title: My AI Song`;
+        lyricsOutput.innerText = generatedText;
+
+    } catch (error) {
+        console.error('Error generating content:', error);
+        lyricsOutput.innerText = 'Failed to generate lyrics. See console for details.';
+    }
 }
 
 function copyToClipboard(id) {
-  const text = document.getElementById(id).innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Copied to clipboard!");
-  });
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+    });
 }
+
+// Make functions available in the global scope
+window.generateContent = generateContent;
+window.copyToClipboard = copyToClipboard;

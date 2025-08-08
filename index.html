@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SunoLyricForge</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.0"></script>
 </head>
 <body>
   <div class="container">
@@ -27,13 +28,8 @@
       <button onclick="copyToClipboard('lyricsOutput')">Copy Lyrics</button>
     </div>
 
-    <div class="output-section">
-      <h2>🎧 Suno Style Description</h2>
-      <pre id="styleOutput"></pre>
-      <button onclick="copyToClipboard('styleOutput')">Copy Style</button>
-    </div>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
