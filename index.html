@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SunoLyricForge</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>SunoLyricForge</h1>
+    <p class="subtitle">Generate AI-powered lyrics with metatags & Suno style guides</p>
+
+    <label for="title">Song Title (optional):</label>
+    <input type="text" id="title" placeholder="Leave blank to auto-generate" />
+
+    <label for="prompt">What is your song about?</label>
+    <textarea id="prompt" rows="4" placeholder="E.g. A sensual house track about falling in love in Berlin"></textarea>
+
+    <button onclick="generateContent()">Generate</button>
+
+    <div id="generatedTitle" class="output-title"></div>
+
+    <div class="output-section">
+      <h2>🎵 Lyrics</h2>
+      <pre id="lyricsOutput"></pre>
+      <button onclick="copyToClipboard('lyricsOutput')">Copy Lyrics</button>
+    </div>
+
+    <div class="output-section">
+      <h2>🎧 Suno Style Description</h2>
+      <pre id="styleOutput"></pre>
+      <button onclick="copyToClipboard('styleOutput')">Copy Style</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
