@@ -23,14 +23,15 @@ async function generateContent() {
         return;
     }
 
-    // Show a loading indicator (optional, but good for UX)
+    const fullPrompt = `Write raw, emotional song lyrics in the style of edm, house, or hyperpop about ${promptText}. Do not use clichés or common AI words like 'echo', 'shadow', or 'whisper'.`;
+
+    // Show a loading indicator
     const lyricsOutput = document.getElementById('lyricsOutput');
     lyricsOutput.innerText = 'Generating... (Model is loading for the first time, this may take a moment)';
 
     try {
         // Get the pipeline instance
         const generator = await TextGenerationPipeline.getInstance((data) => {
-            // You can track loading progress here if you want.
             console.log('Loading progress:', data);
             if (data.status === 'progress') {
                  lyricsOutput.innerText = `Loading model... ${Math.round(data.progress)}%`;
@@ -38,10 +39,12 @@ async function generateContent() {
         });
 
         // Generate text
-        const output = await generator(promptText, {
-            max_new_tokens: 200,
+        const output = await generator(fullPrompt, {
+            max_new_tokens: 250,
             num_return_sequences: 1,
-            eos_token_id: 50256, // End-of-sequence token for GPT-2
+            do_sample: true,
+            top_k: 50,
+            temperature: 0.9,
         });
 
         const generatedText = output[0].generated_text;
